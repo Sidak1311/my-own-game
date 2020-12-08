@@ -5,7 +5,7 @@ const Constraint = Matter.Constraint
 var oliver, loog, basketball
 var rope,hoop, score, obstacle1, obstacle2, obstacle3, obstacle4, obstacle5
 var angle, chance
-
+//Added the enemy images and allowed only 10 turns for the player to do
 function setup() {
   createCanvas(1600,800);
   engine = Engine.create()
