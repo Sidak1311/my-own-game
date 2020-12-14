@@ -1,15 +1,19 @@
+//Added the gameStates along with the story
+//The text at line 102 isn't working. How do i make it work ?
 const World = Matter.World
 const Engine = Matter.Engine
 const Bodies = Matter.Bodies
 const Constraint = Matter.Constraint
 var oliver, loog, basketball
 var rope,hoop, score, obstacle1, obstacle2, obstacle3, obstacle4, obstacle5
-var angle, chance
-//Added the enemy images and allowed only 10 turns for the player to do
+var angle, chance, xForce, yForce, back
+var gameState
+
 function setup() {
   createCanvas(1600,800);
   engine = Engine.create()
   world = engine.world
+  gameState = "story"
   oliver = new Oliver(773,600,50,50)
   arrow = new arrows(oliver.body.position.x,oliver.body.position.y - 60,60,20)
   ground = new Gliver(800,700,2600,20)
@@ -27,57 +31,76 @@ function setup() {
   angle = 0
   score = 0
   chance = 0
+  back = loadImage("background.jpg")
 }
 
 function draw() {
   background(255,255,255);
-  text("x:"+mouseX + "y"+mouseY, mouseX,mouseY)
-  rope.launcher.pointB.x = oliver.body.position.x - 60
-  rope.launcher.pointB.y = oliver.body.position.y + 40
-  Engine.update(engine)
-  topGround.display()
-  leftGround.display()
-  rightGround.display()
-  ground.display()
-  oliver.display()
-  basketball.display()
-  hoop.display()
-  rope.display()
-  arrow.display()
-  arrow.control()
-  oliver.control_oliver()
-  if(score > 1){
-  obstacle1.display()
+  if(gameState === "story"){
+    background("blue")
+    text("Oliver was a disabled boy. The other kids bullied him and told him that he couldn't ever win a basketball game.", 200, 200)
+    text("Oliver is ready to prove them wrong with your help. press p to start", 200, 300)
   }
-  if(score > 3){
-  obstacle2.display()
-  }
-  if(score > 5){
-    obstacle3.display()
-  }
-  if(score > 6){
-    obstacle4.display()
-  }
-  if(score > 8){
-    obstacle5.display()
-  }
-  if(frameCount % 60 === 0){
-    obstacle1.body.position.x = random(100,1500)
-    obstacle2.body.position.y = random(100,700)
-    obstacle3.body.position.x = random(100,1500)
-    obstacle4.body.position.y = random(100,700)
-    obstacle5.body.position.x = random(100,1500)
+  if(gameState === "start"){
+    image(back,0,-displayHeight,displayWidth*1.001,displayHeight*3)
+    text("x:"+mouseX + "y"+mouseY, mouseX,mouseY)
+    rope.launcher.pointB.x = oliver.body.position.x - 60
+    rope.launcher.pointB.y = oliver.body.position.y + 40
+    Engine.update(engine)
+    topGround.display()
+    leftGround.display()
+    rightGround.display()
+    ground.display()
+    oliver.display()
+    basketball.display()
+    hoop.display()
+    rope.display()
+    arrow.display()
+    arrow.control()
+    oliver.control_oliver()
+    if(score > 1){
+    obstacle1.display()
+    }
+    if(score > 3){
+    obstacle2.display()
+    }
+    if(score > 5){
+      obstacle3.display()
+    }
+    if(score > 6){
+      obstacle4.display()
+    }
+    if(score > 8){
+      obstacle5.display()
+    }
+    if(frameCount % 60 === 0){
+      obstacle1.body.position.x = random(100,1500)
+      obstacle2.body.position.y = random(100,700)
+      obstacle3.body.position.x = random(100,1500)
+      obstacle4.body.position.y = random(100,700)
+      obstacle5.body.position.x = random(100,1500)
 
-  }
-  loog = Matter.SAT.collides(oliver.body,ground.body)
-  loog2 = Matter.SAT.collides(oliver.body,rightGround.body)
-  loog3 = Matter.SAT.collides(oliver.body,leftGround.body)
-  loog4 = Matter.SAT.collides(oliver.body,topGround.body)
-  collidedBall = Matter.SAT.collides(basketball.body, topGround.body)
-  collidedBoll2 = Matter.SAT.collides(basketball.body, hoop.body)
+    }
+    loog = Matter.SAT.collides(oliver.body,ground.body)
+    loog2 = Matter.SAT.collides(oliver.body,rightGround.body)
+    loog3 = Matter.SAT.collides(oliver.body,leftGround.body)
+    loog4 = Matter.SAT.collides(oliver.body,topGround.body)
+    collidedBall = Matter.SAT.collides(basketball.body, topGround.body)
+    collidedBoll2 = Matter.SAT.collides(basketball.body, hoop.body)
 
-  text('Score: '+score,124,154)
-  Key_collisions()
+    text('Score: '+score,124,154)
+    text("X force: "+xForce,128,176)
+    text("Y force: "+yForce,127,199)
+    Key_collisions()
+    setForce()
+    if(score === 10){
+      gameState = "end"
+    }
+  }
+  if(gameState === "end"){
+    background("blue")
+    text("CONGRATULATIONS! Oliver proved the bullies wrong and you won!",200,200)
+  }
 }
 
 
@@ -122,12 +145,11 @@ function Key_collisions(){
 }
 
 function keyPressed(){
-  //if(oliver.body.position.x > 793){
-    if(keyCode === 32){
-      Matter.Body.applyForce(basketball.body,arrow.body.position, {x:arrow.body.position.x +200,y:-20})
-      rope.fly()
-      chance += 1
-    }
+  if(keyCode === 32){
+    Matter.Body.applyForce(basketball.body,basketball.body.position, {x:xForce,y:yForce})
+    rope.fly()
+    chance += 1
+  }
     if(chance < 10){
       if(keyCode === 82){
         rope.pointB.x= oliver.body.position.x
@@ -135,5 +157,28 @@ function keyPressed(){
         rope.attach(basketball.body)
       }
     }
+    if(gameState === "story"){
+      if(keyCode === 80){
+        gameState = "start"
+      }
+    }
+}
 
+function setForce(){
+  if(arrow.body.position.x === oliver.body.position.x){
+    xForce = 0
+  }else if(arrow.body.position.x < oliver.body.position.x){
+    xForce = (arrow.body.position.x - oliver.body.position.x)/500
+  }else if(arrow.body.position.x > oliver.body.position.x){
+    xForce = (arrow.body.position.x - oliver.body.position.x)/500
+  }
+
+
+  if(arrow.body.position.y === oliver.body.position.y){
+    yForce = 0
+  }else if(arrow.body.position.y < oliver.body.position.y){
+    yForce = (arrow.body.position.y - oliver.body.position.y)/500
+  }else if(arrow.body.position.y > oliver.body.position.y){
+    yForce = (arrow.body.position.y - oliver.body.position.y)/500
+  }
 }
