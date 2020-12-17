@@ -1,5 +1,5 @@
-//Added the gameStates along with the story
-//The text at line 102 isn't working. How do i make it work ?
+//Rather than making restrictions for oliver i did not allow him to move up or down
+//Added the hoop rectangle for better collision
 const World = Matter.World
 const Engine = Matter.Engine
 const Bodies = Matter.Bodies
@@ -22,7 +22,7 @@ function setup() {
   rightGround = new Gliver(1550,400,20,2600)
   basketball = new ball(800,400,20)
   rope = new launcher(basketball.body, {x:oliver.body.position.x,y:oliver.body.position.y + 40})
-  hoop = new hop(768,115,50,20)
+  hoop = new hop(888,115,50,20)
   obstacle1 = new obstacles(random(93,1490),random(194, 500),50,50)
   obstacle2 = new obstacles(random(93,1490),random(194, 500),50,50)
   obstacle3 = new obstacles(random(93,1490),random(194, 500),50,50)
@@ -50,10 +50,10 @@ function draw() {
     topGround.display()
     leftGround.display()
     rightGround.display()
+    hoop.display()
+    basketball.display()
     ground.display()
     oliver.display()
-    basketball.display()
-    hoop.display()
     rope.display()
     arrow.display()
     arrow.control()
@@ -89,8 +89,6 @@ function draw() {
     collidedBoll2 = Matter.SAT.collides(basketball.body, hoop.body)
 
     text('Score: '+score,124,154)
-    text("X force: "+xForce,128,176)
-    text("Y force: "+yForce,127,199)
     Key_collisions()
     setForce()
     if(score === 10){
@@ -99,6 +97,7 @@ function draw() {
   }
   if(gameState === "end"){
     background("blue")
+    fill("black")
     text("CONGRATULATIONS! Oliver proved the bullies wrong and you won!",200,200)
   }
 }
@@ -138,9 +137,11 @@ function Key_collisions(){
   }
   if(collidedBall.collided  ||  collidedBoll2.collided){
     rope.attach(basketball.body)
+    chance += 1
   }
   if(collidedBoll2.collided){
     score += 1
+    chance += 1
   }
 }
 
